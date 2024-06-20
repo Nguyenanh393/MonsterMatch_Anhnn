@@ -41,17 +41,17 @@ export class ReadMap {
             });
             //log('LevelData:', LevelManager.getInstance().levelDataList.length);
             this.blockWidth = LevelManager.getInstance().blockWidth;
-            
-            this.loadLevel(0);
+            log('currentLevel:', localStorage.getItem("currentLevel") ? parseInt(localStorage.getItem("currentLevel")) : 1);
+            this.loadLevel(localStorage.getItem("currentLevel") ? parseInt(localStorage.getItem("currentLevel")) : 1);
         });
 
         
     }
 
     loadLevel(level: number) {
-        this.blockController.currentMap = LevelManager.getInstance().levelDataList[level].getMap().map((arr) => arr.slice());
-        this.blockController.fixedMap = LevelManager.getInstance().levelDataList[level].getMap().map((arr) => arr.slice());
-        this.processMatrix(this.blockController.currentMap, LevelManager.getInstance().levelDataList[level].getMaxValue());
+        this.blockController.currentMap = LevelManager.getInstance().levelDataList[level - 1].getMap().map((arr) => arr.slice());
+        this.blockController.fixedMap = LevelManager.getInstance().levelDataList[level - 1].getMap().map((arr) => arr.slice());
+        this.processMatrix(this.blockController.currentMap, LevelManager.getInstance().levelDataList[level - 1].getMaxValue());
     }
 
 

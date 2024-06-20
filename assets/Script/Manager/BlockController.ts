@@ -17,15 +17,14 @@ interface NodeWithE {
 
 const COLOUR_LIST = [
     new Color(72, 209, 85, 255), // light green
-    new Color(65, 109, 77, 255), // dark green
+    new Color(65, 190, 77, 255), // dark green
 ];
 
 const COLOUR_LIST_HEAD = [
-    Color.RED,
-    Color.YELLOW,
-    Color.BLUE,
-    Color.GREEN,
-    Color.BLACK,
+    new Color(255, 235, 0, 255),
+    new Color(255, 124, 91, 255),
+    new Color(0, 206, 255, 255),
+    new Color(255, 124, 186, 255),
     Color.WHITE,
     Color.GRAY,
     Color.CYAN
@@ -56,7 +55,6 @@ export class BlockController extends Singleton<BlockController> {
     @property(Node)
     nodeBlockParent: Node = null;
 
-    // listPathParentChildren: Node[] = [];
     currentMap: number[][] = null;
     fixedMap: number[][] = null;
 
@@ -94,18 +92,9 @@ export class BlockController extends Singleton<BlockController> {
     }
 
     spawnListPathParentChildren(numberColor: number) {
-        // log("Max value", numberColor);
         for (let i = 0; i < numberColor; i++) {
-            // log(COLOUR_LIST_HEAD[i])
             this.spawnPathParent(COLOUR_LIST_HEAD[i], i + 1);
         }
-
-
-        // let list = this.pathParent.children;
-        // for (let i = 0; i < list.length; i++) {
-        //     this.PATHPARENT_LIST_COLOR.set(COLOUR_LIST[i], list[i]);
-        // }
-        // log("PathParent", this.PATHPARENT_LIST_COLOR);
     }
 
     spawnPathParent(color : Color, numberColor: number) {
@@ -216,15 +205,6 @@ export class BlockController extends Singleton<BlockController> {
         return path;
     }
 
-    removePathBlock(color : Color) {
-        let list = this.PATHPARENT_LIST_COLOR.get(color).children;
-        for (let i = 0; i < list.length; i++) {
-            if (list[i].getComponent(Sprite).color === color) {
-                list[i].destroy();
-            }
-        }
-    }
-
     resetCurrentMap(path: Vec3[]) {
         for (let i = 0; i < path.length; i++) {
             let pos = path[i];
@@ -275,6 +255,16 @@ export class BlockController extends Singleton<BlockController> {
                 }
             }
         }
+    }
+
+    checkWin() {
+        for (let i = 0; i < NODEBLOCK_LIST_COLOR.size; i++) {
+            let block = NODEBLOCK_LIST_COLOR.get(COLOUR_LIST_HEAD[i]);
+            if (Vec3.distance(block.node.position, block.anotherBlock.node.position) > 0.1) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

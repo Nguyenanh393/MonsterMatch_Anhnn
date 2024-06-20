@@ -40,12 +40,20 @@ export class NodeBlock extends Component {
 
     onTouchMove(event: EventTouch) {
         let delta = event.getUILocation();
-        this.moveNodeBlock(delta);
-        
+
+        if (this.blockController.getCOLOUR_LIST_COLOR().get(this.blockColor) == this) {
+            this.moveNodeBlock(delta);
+            //this.anotherBlock.node.active = false;
+        } else {
+            if (this.blockController.getCOLOUR_LIST_COLOR().get(this.blockColor) != null) {
+                this.anotherBlock.moveNodeBlock(delta);
+                //this.node.active = false;
+            }
+        }
+        //this.moveNodeBlock(delta);
     }
     moveNodeBlock(delta: Vec2) {
         let {startPos, targetPos, targetIndRow, targetIndCol} = this.findStartTargetPos(delta);
-        
         
         if (!this.canFindPath(startPos, targetPos, targetIndRow, targetIndCol)) {
             return;
@@ -61,7 +69,7 @@ export class NodeBlock extends Component {
     findStartTargetPos(delta: Vec2) {
         let movementX = delta.x - this.canvas.position.x;
         let movementY = delta.y - this.canvas.position.y;
-
+        
         let posX = Math.round((movementX - this.movementExtraX) / this.blockSize) * this.blockSize + this.movementExtraX;
         let posY = Math.round((movementY - this.movementExtraY) / this.blockSize) * this.blockSize + this.movementExtraY;
     
@@ -186,13 +194,11 @@ export class NodeBlock extends Component {
                 this.anotherBlock = list[i].getComponent(NodeBlock);
                 break;
             }
-        }
-            
+        }           
         this.isChoose = true;
         log("Choose" + this.name);
         let list1 = this.blockController.getCOLOUR_LIST_COLOR();
         let block = list1.get(this.blockColor);
-
         if (block != this) {
             if (block != null) {
 
@@ -203,13 +209,15 @@ export class NodeBlock extends Component {
                 
             }
             list1.set(this.blockColor, this);
+            
         } else {
             log("Choose" + this.name);
+            log("node position", this.node.position, "anotherBlock position", this.anotherBlock.node.position);
             if (Vec3.distance(this.node.position, this.anotherBlock.node.position) < 0.1) {
                 this.resetPath();
-                list1.set(this.blockColor, block);
+                list1.set(this.blockColor, this.anotherBlock);
                 this.isChoose = false;
-                block.isChoose = true;
+                this.anotherBlock.isChoose = true;
             }
         }
     }

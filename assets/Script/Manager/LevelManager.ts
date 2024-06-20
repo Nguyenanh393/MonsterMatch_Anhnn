@@ -19,6 +19,10 @@ export class LevelManager extends Singleton<LevelManager> {
     getLevelData(currentLevel: number) {
         return this.levelDataList[currentLevel - 1];
     }
+
+    saveCurrentLevel() {
+        localStorage.setItem("currentLevel", this.currentLevel.toString());
+    }
 }
 
 
