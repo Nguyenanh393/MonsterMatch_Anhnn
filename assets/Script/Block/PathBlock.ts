@@ -19,7 +19,6 @@ export class PathBlock extends Component {
         nodeBlock.isChoose = true;
         nodeBlock.moveNodeBlock(delta);
         
-        // log(BlockController.getInstance().currentMap);
     }
 }
 

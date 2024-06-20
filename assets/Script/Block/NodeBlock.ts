@@ -204,8 +204,12 @@ export class NodeBlock extends Component {
             }
             list1.set(this.blockColor, this);
         } else {
-            if (Vec3.distance(this.currentPos, this.anotherBlock.currentPos) < 0.1) {
+            log("Choose" + this.name);
+            if (Vec3.distance(this.node.position, this.anotherBlock.node.position) < 0.1) {
                 this.resetPath();
+                list1.set(this.blockColor, block);
+                this.isChoose = false;
+                block.isChoose = true;
             }
         }
     }
