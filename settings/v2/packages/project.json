@@ -6,5 +6,15 @@
       "height": 1920,
       "fitWidth": false
     }
+  },
+  "sorting-layer": {
+    "layers": [
+      {
+        "id": 0,
+        "name": "default",
+        "value": 0
+      }
+    ],
+    "increaseId": 1
   }
 }
