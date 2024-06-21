@@ -2,6 +2,7 @@ import { _decorator, JsonAsset, log, resources, Vec3 } from 'cc';
 import { LevelManager } from '../Manager/LevelManager';
 import { LevelData } from '../Level/LevelData';
 import { BlockController } from '../Manager/BlockController';
+import { CharacterManager } from '../Manager/CharacterManager';
 
 const { ccclass, property } = _decorator;
 
@@ -41,8 +42,10 @@ export class ReadMap {
             });
             //log('LevelData:', LevelManager.getInstance().levelDataList.length);
             this.blockWidth = LevelManager.getInstance().blockWidth;
+            log('blockWidth:', this.blockWidth);
             log('currentLevel:', localStorage.getItem("currentLevel") ? parseInt(localStorage.getItem("currentLevel")) : 1);
             this.loadLevel(localStorage.getItem("currentLevel") ? parseInt(localStorage.getItem("currentLevel")) : 1);
+            
         });
 
         
@@ -52,6 +55,10 @@ export class ReadMap {
         this.blockController.currentMap = LevelManager.getInstance().levelDataList[level - 1].getMap().map((arr) => arr.slice());
         this.blockController.fixedMap = LevelManager.getInstance().levelDataList[level - 1].getMap().map((arr) => arr.slice());
         this.processMatrix(this.blockController.currentMap, LevelManager.getInstance().levelDataList[level - 1].getMaxValue());
+        log(this.blockWidth + "-----")
+        LevelManager.getInstance().setPositionPartBg();
+        LevelManager.getInstance().loadFloor(this.blockWidth);
+        CharacterManager.getInstance().spawnCharacter(LevelManager.getInstance().levelDataList[level - 1].getMaxValue());
     }
 
 
@@ -61,8 +68,9 @@ export class ReadMap {
 
         
         let startX = -mapWidth * this.blockWidth / 2 + this.blockWidth / 2;
-        let startY = mapHeight * this.blockWidth / 2 - this.blockWidth / 2;
-
+        // TRY
+        let startY = 0;
+        // let startY = mapHeight * this.blockWidth / 2 - this.blockWidth / 2;
         //log('startX:', startX, 'startY:', startY);
         this.blockController.startX = startX;
         this.blockController.startY = startY;

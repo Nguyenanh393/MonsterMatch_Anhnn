@@ -1,4 +1,4 @@
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, log, Node } from 'cc';
 import { Singleton } from '../Other/Singleton';
 import { UIManager } from '../UI/UIManager';
 import { GamePlay } from '../UI/UICanvas/GamePlay';
@@ -17,9 +17,14 @@ export class MainController extends Singleton<MainController> {
     @property(LevelManager)
     levelManager: LevelManager = null;
 
-    start(): void {
-        this.uiManager.openUI(GamePlay);
+    async start(): Promise<void> {
+        //this.uiManager.openUI(GamePlay);
         this.levelManager.mapParent.active = true;
+
+        let gamePlay = await this.uiManager.getUI(GamePlay);
+        log('GamePlay:', gamePlay);
+        //gamePlay.setPositionPartBg();
+        gamePlay.setLevelLabel(this.levelManager.currentLevel);
     }
 }
 

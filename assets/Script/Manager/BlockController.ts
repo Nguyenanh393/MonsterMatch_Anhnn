@@ -1,12 +1,14 @@
-import { _decorator, Color, Component, instantiate, LightingStage, log, Node, Prefab, Sprite, UITransform, Vec2, Vec3 } from 'cc';
+import { _decorator, Color, Component, instantiate, LightingStage, log, Node, Prefab, Quat, Sprite, UITransform, Vec2, Vec3 } from 'cc';
 import { Singleton } from '../Other/Singleton';
 import { ReadMap } from '../Map/ReadMap';
 import { LevelManager } from './LevelManager';
 import { Block } from '../Block/Block';
 import { NodeBlock } from '../Block/NodeBlock';
 import { PathBlock } from '../Block/PathBlock';
+import { CharacterManager } from './CharacterManager';
 const { ccclass, property } = _decorator;
-
+// 5- 10 level
+// tween hero
 interface NodeWithE {
     pos: Vec3;
     f: number;
@@ -30,13 +32,14 @@ const COLOUR_LIST_HEAD = [
     Color.CYAN
 ];
 
-const NODEBLOCK_LIST_COLOR : Map<Color, NodeBlock> = new Map();
-const NODEBLOCK_LIST_POS : Map<NodeBlock, Vec3> = new Map();
+const NODEBLOCK_LIST_COLOR : Map<Color, NodeBlock> = new Map(); // Lưu nodeBlock đang được chọn theo màu
+const NODEBLOCK_LIST_POS : Map<NodeBlock, Vec3> = new Map(); // lưu vị trí ban đầu của nodeBlock
 
 @ccclass('BlockController')
 export class BlockController extends Singleton<BlockController> {
 
     colourList: Color[] = COLOUR_LIST;
+    colourListHead: Color[] = COLOUR_LIST_HEAD;
 
     @property(Node)
     blockParent: Node = null;
@@ -62,7 +65,8 @@ export class BlockController extends Singleton<BlockController> {
     startX: number = 0;
     startY: number = 0;
     blockSize: number;
-    PATHPARENT_LIST_COLOR : Map<Color, Node> = new Map();
+    PATHPARENT_LIST_COLOR : Map<Color, Node> = new Map(); // Lưu pathParent theo màu
+    currentColorNumber: number = 0;
 
     onLoad() {
         super.onLoad();
@@ -118,7 +122,7 @@ export class BlockController extends Singleton<BlockController> {
         blockSprite.color = color; 
     }
 
-    spawnPathBlock(pos : Vec3, color : Color, isHorizontal: boolean) {
+    spawnPathBlock(pos : Vec3, color : Color, isTurnRight : boolean, isTurnLeft : boolean, isTurnUp : boolean, isTurnDown : boolean) {
         if (this.hasPathBlock(color, pos)) {
             return;
         }
@@ -126,17 +130,20 @@ export class BlockController extends Singleton<BlockController> {
         this.PATHPARENT_LIST_COLOR.get(color).addChild(pathBlock);
         pathBlock.setPosition(pos);
 
-        if (isHorizontal) {
-            pathBlock.getComponent(UITransform).width = LevelManager.getInstance().blockWidth * 1.4;
-            pathBlock.getComponent(UITransform).height = LevelManager.getInstance().blockWidth * 0.4;
-        } else {
-            pathBlock.getComponent(UITransform).width = LevelManager.getInstance().blockWidth * 0.4;
-            pathBlock.getComponent(UITransform).height = LevelManager.getInstance().blockWidth * 1.4;
+        let pathBlockUITransform = pathBlock.getComponent(UITransform);
+        pathBlockUITransform.width = LevelManager.getInstance().blockWidth;
+        pathBlockUITransform.height = LevelManager.getInstance().blockWidth;
+        let angle = 0;
+        if (isTurnRight) {
+            angle = 90;
+        } else if (isTurnLeft) {
+            angle = 270;
+        } else if (isTurnUp) {
+            angle = 180;
+        } else if (isTurnDown) {
+            angle = 0;
         }
-
-        let pathBlockSprite = pathBlock.getComponent(Sprite);
-        pathBlockSprite.color = color;
-        pathBlock.getComponent(PathBlock).onInit(color);
+        pathBlock.getComponent(PathBlock).onInit(color, this.currentColorNumber, angle);
     }
 
     hasPathBlock(color : Color, pos : Vec3) {
@@ -258,15 +265,36 @@ export class BlockController extends Singleton<BlockController> {
     }
 
     checkWin() {
-        for (let i = 0; i < NODEBLOCK_LIST_COLOR.size; i++) {
-            let block = NODEBLOCK_LIST_COLOR.get(COLOUR_LIST_HEAD[i]);
-            if (Vec3.distance(block.node.position, block.anotherBlock.node.position) > 0.1) {
-                return false;
+        log(NODEBLOCK_LIST_POS)
+        let list = Array.from(NODEBLOCK_LIST_POS.keys());
+        for (let i = 1; i < list.length; i++) {
+            if (list[i].blockNumber == list[i - 1].blockNumber) {
+                if (Vec3.distance(list[i].node.position, list[i - 1].node.position) > 0.1) {
+                    return false;
+                }
             }
         }
         return true;
     }
 
+    makeHeroAttackMonster(blockNumber: number) {
+        if (blockNumber != this.currentColorNumber) {
+            return;
+        }
+        let list = Array.from(NODEBLOCK_LIST_POS.keys());
+        for (let i = 1; i < list.length; i+=2) {
+            log("Number: " + list[i].blockNumber + " " + this.currentColorNumber)
+            if (list[i].blockNumber != blockNumber) {
+                continue;
+            }
+            if (list[i].blockNumber == list[i - 1].blockNumber) {
+                if (Vec3.distance(list[i].node.position, list[i - 1].node.position) < 0.1) {
+                    log("Attack" + list[i].blockNumber);
+                    CharacterManager.getInstance().makeHeroAttackMonster(list[i].blockNumber);
+                    break;
+                }
+            }
+        }
+    }
 }
-
 

@@ -2,6 +2,7 @@ import { _decorator, color, Color, Component, EventMouse, EventTouch, find, log,
 import { BlockController } from '../Manager/BlockController';
 import { Block } from './Block';
 import { LevelManager } from '../Manager/LevelManager';
+import { CharacterManager } from '../Manager/CharacterManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('NodeBlock')
@@ -122,11 +123,8 @@ export class NodeBlock extends Component {
         
         if (minIndex < this.currentPath.length && minIndex > 0) {
             for (let i = this.currentPath.length - 1; i > minIndex; i--) {
-                let isHorizontal = this.currentPath[i - 1].x == this.currentPath[i].x;
-                let isTurnRight = this.currentPath[i - 1].y < this.currentPath[i].y;
-                let isTurnUp = this.currentPath[i - 1].x > this.currentPath[i].x;
                 log("Remove", this.currentPath[i]);
-                this.removePathNode(isHorizontal, isTurnRight, isTurnUp, this.currentPath[i].x, this.currentPath[i].y);
+                this.removePathNode(this.currentPath[i].x, this.currentPath[i].y);
                 this.currentPath.pop();
                 
                 let posX = this.currentPath[i - 1].y * this.blockSize + this.blockController.startX;
@@ -150,28 +148,25 @@ export class NodeBlock extends Component {
             if (Vec3.distance(this.node.position, this.anotherBlock.node.position) < 0.1) {
                 return;
             }
-            let isHorizontal = path[i - 1].x == path[i].x;
             let isTurnRight = path[i - 1].y < path[i].y;
+            let isTurnLeft = path[i - 1].y > path[i].y;
             let isTurnUp = path[i - 1].x > path[i].x;
-            let moveX = !isHorizontal ? 0 : (isTurnRight ? -this.blockSize/2 :  this.blockSize/2);
-            let moveY = isHorizontal ? 0 : (isTurnUp ? -this.blockSize/2 : this.blockSize/2);
+            let isTurnDown = path[i - 1].x < path[i].x;
+
 
             let posX = path[i].y * this.blockSize + this.blockController.startX;
             let posY = this.blockController.startY - path[i].x * this.blockSize;
 
-            this.blockController.spawnPathBlock(new Vec3(posX + moveX, posY + moveY, 0), this.blockColor, isHorizontal);
+            this.blockController.spawnPathBlock(new Vec3(posX, posY, 0), this.blockColor, isTurnRight, isTurnLeft, isTurnUp, isTurnDown);
             this.currentPath.push(path[i]);
             this.node.position = new Vec3 (posX, posY, 0);
             this.currentPos = this.node.position.clone();
         }
     }
 
-    removePathNode(isHorizontal: boolean, isTurnRight: boolean, isTurnUp : boolean, pathX: number, pathY: number) {
-        let moveX = !isHorizontal ? 0 : (isTurnRight ? -this.blockSize/2 :  this.blockSize/2);
-        let moveY = isHorizontal ? 0 : (isTurnUp ? -this.blockSize/2 : this.blockSize/2);
-
-        let posX = pathY * this.blockSize + this.blockController.startX + moveX;
-        let posY = this.blockController.startY - pathX * this.blockSize + moveY;
+    removePathNode(pathX: number, pathY: number) {
+        let posX = pathY * this.blockSize + this.blockController.startX;
+        let posY = this.blockController.startY - pathX * this.blockSize;
 
         this.blockController.removeNodeBlock(this.blockColor, new Vec3(posX, posY, 0));     
     }
@@ -182,19 +177,26 @@ export class NodeBlock extends Component {
         this.currentPos = this.node.position.clone();
         if (this.isChoose) {
             this.blockController.changeCurrentMap(this.blockNumber, this.currentPath);
-            log(this.blockController.currentMap);
         }
         this.isChoose = false;
+        log(this.blockController.checkWin());
+        // if(Vec3.distance(this.node.position, this.anotherBlock.node.position) < 0.1) {
+        this.blockController.makeHeroAttackMonster(this.blockNumber);
+        // }
+        
     }
 
     onMouseDown(event: EventMouse) {
+        this.blockController.currentColorNumber = this.blockNumber;
         let list = this.blockController.nodeBlockParent.children;
         for (let i = 0; i < list.length; i++) {
             if (list[i].getComponent(NodeBlock).blockColor == this.blockColor && list[i].getComponent(NodeBlock) != this) {
                 this.anotherBlock = list[i].getComponent(NodeBlock);
                 break;
             }
-        }           
+        }  
+        
+        log("this.position", this.node.position, "anotherBlock.position", this.anotherBlock.node.position);
         this.isChoose = true;
         log("Choose" + this.name);
         let list1 = this.blockController.getCOLOUR_LIST_COLOR();
