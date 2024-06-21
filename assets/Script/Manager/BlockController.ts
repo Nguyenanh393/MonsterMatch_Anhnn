@@ -290,7 +290,14 @@ export class BlockController extends Singleton<BlockController> {
             if (list[i].blockNumber == list[i - 1].blockNumber) {
                 if (Vec3.distance(list[i].node.position, list[i - 1].node.position) < 0.1) {
                     log("Attack" + list[i].blockNumber);
-                    CharacterManager.getInstance().makeHeroAttackMonster(list[i].blockNumber);
+                    let monsterPos = CharacterManager.getInstance().list_monster[list[i].blockNumber - 1].position.clone();
+                    let monsterOriginPos = CharacterManager.getInstance().originPos[list[i].blockNumber - 1];
+                    
+                    log("Monster pos: " + monsterPos);
+                    log("Monster origin pos: " + monsterOriginPos);
+                    if (Vec3.distance(monsterPos, monsterOriginPos) < 0.1) {
+                        CharacterManager.getInstance().makeHeroAttackMonster(list[i].blockNumber);
+                    } 
                     break;
                 }
             }

@@ -1,7 +1,9 @@
-import { _decorator, Component, easing, instantiate, log, Node, Prefab, Sprite, tween, UITransform, Vec3 } from 'cc';
+import { _decorator, Component, easing, instantiate, log, Node, Prefab, Sprite, tween, UI, UITransform, Vec3 } from 'cc';
 import { LevelManager } from './LevelManager';
 import { BlockController } from './BlockController';
 import { Singleton } from '../Other/Singleton';
+import { UIManager } from '../UI/UIManager';
+import { WinUI } from '../UI/UICanvas/WinUI';
 const { ccclass, property } = _decorator;
 
 const MONSTER_START_POSITION_X = 100;
@@ -128,7 +130,7 @@ export class CharacterManager extends Singleton<CharacterManager> {
         this.moveMonster(false, blockColor);
 
         if (BlockController.getInstance().checkWin()) {
-            log("You Win");
+            UIManager.getInstance().openUI(WinUI);
         }
     }
     
