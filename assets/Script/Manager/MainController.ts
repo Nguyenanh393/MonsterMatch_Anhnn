@@ -28,7 +28,7 @@ export class MainController extends Singleton<MainController> {
     reset() {
         BlockController.getInstance().reset();
         CharacterManager.getInstance().reset();
-        
+        BlockController.getInstance().turnOnNodeBlockEvent();
     }
     restart() {
         this.reset();

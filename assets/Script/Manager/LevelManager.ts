@@ -15,6 +15,7 @@ export class LevelManager extends Singleton<LevelManager> {
     @property(Node)
     mapParent: Node = null;
 
+    @property(Floor)
     floor: Floor = null;
 
     levelDataList: LevelData[] = [];
@@ -29,7 +30,6 @@ export class LevelManager extends Singleton<LevelManager> {
         //delete current level in local storage
         //localStorage.removeItem("currentLevel");
         super.onLoad();
-        this.floor = this.mapParent.children[1].getComponent(Floor);
         this.currentLevel = localStorage.getItem("currentLevel") ? parseInt(localStorage.getItem("currentLevel")) : 1;
     }
     getLevelData(currentLevel: number) {

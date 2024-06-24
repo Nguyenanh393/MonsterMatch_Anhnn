@@ -360,6 +360,9 @@ export class BlockController extends Singleton<BlockController> {
 
         let listPathParent = Array.from(this.PATHPARENT_LIST_COLOR.values());
         for (let i = 0; i < listPathParent.length; i++) {
+            if (listPathParent[i] == null) {
+                continue;
+            }
             listPathParent[i].destroy();
         }
 
