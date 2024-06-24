@@ -3,6 +3,7 @@ import { Singleton } from '../Other/Singleton';
 import { LevelData } from '../Level/LevelData';
 import { Floor } from '../Map/Floor';
 import { BlockController } from './BlockController';
+import { ReadMap } from '../Map/ReadMap';
 const { ccclass, property } = _decorator;
 const MOVEMENT_UI : number = 300;
 @ccclass('LevelManager')
@@ -19,6 +20,7 @@ export class LevelManager extends Singleton<LevelManager> {
     levelDataList: LevelData[] = [];
 
     currentLevel: number = 1;
+    readMapObj : ReadMap = null;
 
     @property(Node)
     partBg : Node = null;
@@ -51,6 +53,27 @@ export class LevelManager extends Singleton<LevelManager> {
         let posY = BlockController.getInstance().startY - partBgHeight / 2 + this.getMovementUI();
 
         this.partBg.setPosition(new Vec3(0, posY, 0));
+    }
+
+    nextLevel() {
+        this.currentLevel++;
+        this.saveCurrentLevel();
+        this.readMapObj.loadLevel(this.currentLevel);
+
+    }
+
+    loadCurrentLevel() {
+        let currentLevel = localStorage.getItem("currentLevel");
+        if (currentLevel) {
+            this.currentLevel = parseInt(currentLevel);
+        }
+
+        this.readMapObj.loadLevel(this.currentLevel);
+    }
+
+    loadLevelNumber(levelNumber: number) {
+        this.currentLevel = levelNumber;
+        this.readMapObj.loadLevel(this.currentLevel);
     }
 
 }

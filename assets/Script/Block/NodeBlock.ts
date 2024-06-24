@@ -24,9 +24,7 @@ export class NodeBlock extends Component {
 
     onInit(color: Color, startPos: Vec3, blockNumber: number) {
         this.canvas = find("Canvas");
-        this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove, this); 
-        this.canvas.on(Node.EventType.MOUSE_UP, this.onMouseUP, this);
-        this.node.on(Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        this.turnOnEvent();
 
         this.blockColor = color;
         this.blockStartPos = startPos;
@@ -178,6 +176,7 @@ export class NodeBlock extends Component {
         if (this.isChoose) {
             this.blockController.changeCurrentMap(this.blockNumber, this.currentPath);
         }
+        log("CurrentMap", this.blockController.currentMap);
         this.isChoose = false;
         log(this.blockController.checkWin());
         // if(Vec3.distance(this.node.position, this.anotherBlock.node.position) < 0.1) {
@@ -224,6 +223,32 @@ export class NodeBlock extends Component {
         }
     }
 
+    onMouseDownCanvas(event: EventMouse) {
+        log("Mouse Down Canvas");
+        let delta = event.getUILocation();
+        let movementX = delta.x - this.canvas.position.x;
+        let movementY = delta.y - this.canvas.position.y;
+        
+        let posX = Math.round((movementX - this.movementExtraX) / this.blockSize) * this.blockSize + this.movementExtraX;
+        let posY = Math.round((movementY - this.movementExtraY) / this.blockSize) * this.blockSize + this.movementExtraY;
+
+        let deltaPos = new Vec3(posX, posY, 0);
+
+        let list = Array.from(this.blockController.getCOLOUR_LIST_POS().keys());
+        for (let i = 0; i < list.length; i++) {
+            let block = this.blockController.getCOLOUR_LIST_POS().get(list[i]);
+            log("Block", block, "DeltaPos", deltaPos);
+            if (Vec3.distance(block, deltaPos) < this.blockSize / 2) {
+                log("Reset Path");
+                this.blockController.getCOLOUR_LIST_COLOR().get(list[i].blockColor).resetPath();
+                this.blockController.getCOLOUR_LIST_COLOR().get(list[i].blockColor).isChoose = true;
+                CharacterManager.getInstance().moveMonster(true, list[i].blockNumber);
+                return;
+            }
+        }
+        return;
+    }
+
     resetPath() {
         this.blockController.removeAllPathNode(this.blockColor, this.blockNumber);
         this.resetNodeBlock();
@@ -237,6 +262,20 @@ export class NodeBlock extends Component {
 
         this.currentPath = [new Vec3(indexRow1, indexCol1, 0)];
         this.currentPos = this.node.position.clone();
+    }
+
+    turnOffEvent() {
+        this.node.off(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
+        this.canvas.off(Node.EventType.MOUSE_UP, this.onMouseUP, this);
+        this.node.off(Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        this.canvas.off(Node.EventType.MOUSE_DOWN, this.onMouseDownCanvas, this);
+    }
+
+    turnOnEvent() {
+        this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
+        this.canvas.on(Node.EventType.MOUSE_UP, this.onMouseUP, this);
+        this.canvas.on(Node.EventType.MOUSE_DOWN, this.onMouseDownCanvas, this);
+        this.node.on(Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
     }
 
 }

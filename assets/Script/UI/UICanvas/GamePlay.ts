@@ -18,10 +18,14 @@ export class GamePlay extends UICanvas {
 
     onPauseButtonClicked() {
         UIManager.getInstance().openUI(PauseUI);
+        BlockController.getInstance().turnOffNodeBlockEvent();
+        this.close(0);
     }
 
     onHintButtonClicked() {
         UIManager.getInstance().openUI(HintUI);
+        BlockController.getInstance().turnOffNodeBlockEvent();
+        this.close(0);
     }
 }
 

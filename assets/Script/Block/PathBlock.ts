@@ -27,12 +27,19 @@ export class PathBlock extends Component {
 
     onMouseDown(event: EventMouse) {
         let delta = event.getUILocation();
-
         let nodeBlock = BlockController.getInstance().getCOLOUR_LIST_COLOR().get(this.pathBlockColor);
         nodeBlock.isChoose = true;
         nodeBlock.moveNodeBlock(delta);
         BlockController.getInstance().currentColorNumber = nodeBlock.blockNumber;
         CharacterManager.getInstance().moveMonster(true, this.pathBlockNumber)
+    }
+
+    turnOffNodeBlockEvent() {
+        this.node.off(Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+    }
+
+    turnOnNodeBlockEvent() {
+        this.node.on(Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
     }
     
 }

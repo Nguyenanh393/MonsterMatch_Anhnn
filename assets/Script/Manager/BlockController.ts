@@ -67,7 +67,7 @@ export class BlockController extends Singleton<BlockController> {
     blockSize: number;
     PATHPARENT_LIST_COLOR : Map<Color, Node> = new Map(); // Lưu pathParent theo màu
     currentColorNumber: number = 0;
-
+    readMapObj: ReadMap = null;
     onLoad() {
         super.onLoad();
         this.readMap();
@@ -75,8 +75,9 @@ export class BlockController extends Singleton<BlockController> {
     }
 
     readMap() {
-        const readMap = new ReadMap();
-        readMap.loadJson(this);
+        this.readMapObj = new ReadMap();
+        this.readMapObj.loadJson(this);
+        LevelManager.getInstance().readMapObj = this.readMapObj;
     }
 
     spawnBlock(pos : Vec3, color : number) {
@@ -303,5 +304,64 @@ export class BlockController extends Singleton<BlockController> {
             }
         }
     }
+
+    turnOffNodeBlockEvent() {
+        log("Turn off event");
+        let list = Array.from(NODEBLOCK_LIST_POS.keys());
+        for (let i = 0; i < list.length; i++) {
+            list[i].turnOffEvent();
+        }
+
+        let listPathParent = Array.from(this.PATHPARENT_LIST_COLOR.values());
+        let listPath = [];
+        for (let i = 0; i < listPathParent.length; i++) {
+            listPath = listPath.concat(listPathParent[i].children);
+        }
+        for (let i = 0; i < listPath.length; i++) {
+            listPath[i].getComponent(PathBlock).turnOffNodeBlockEvent();
+        }
+    }
+
+    turnOnNodeBlockEvent() {
+        let list = Array.from(NODEBLOCK_LIST_POS.keys());
+        for (let i = 0; i < list.length; i++) {
+            list[i].turnOnEvent();
+        }
+
+        let listPathParent = Array.from(this.PATHPARENT_LIST_COLOR.values());
+        let listPath = [];
+        for (let i = 0; i < listPathParent.length; i++) {
+            listPath = listPath.concat(listPathParent[i].children);
+        }
+        for (let i = 0; i < listPath.length; i++) {
+            listPath[i].getComponent(PathBlock).turnOnNodeBlockEvent();
+        }
+    }
+
+    reset() {
+        log("Reset");
+        let list = Array.from(NODEBLOCK_LIST_POS.keys());
+        for (let i = 0; i < list.length; i++) {
+            list[i].node.destroy();
+        }
+
+        let listBlock = this.blockParent.children;
+        for (let i = 0; i < listBlock.length; i++) {
+            listBlock[i].destroy();
+        }
+
+        NODEBLOCK_LIST_POS.clear();
+        NODEBLOCK_LIST_COLOR.clear();
+        // this.readMap();
+
+        let listPathParent = Array.from(this.PATHPARENT_LIST_COLOR.values());
+        for (let i = 0; i < listPathParent.length; i++) {
+            listPathParent[i].destroy();
+        }
+
+        
+    }
+
+
 }
 

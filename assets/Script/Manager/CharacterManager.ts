@@ -131,7 +131,17 @@ export class CharacterManager extends Singleton<CharacterManager> {
 
         if (BlockController.getInstance().checkWin()) {
             UIManager.getInstance().openUI(WinUI);
+            BlockController.getInstance().turnOffNodeBlockEvent();
         }
+    }
+
+    reset() {
+        this.list_monster.forEach(monster => {
+            monster.destroy();
+        });
+        this.list_monster = [];
+        this.originPos = [];
+        this.hero.destroy();
     }
     
 }
