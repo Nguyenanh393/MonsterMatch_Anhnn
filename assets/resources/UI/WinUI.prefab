@@ -804,7 +804,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "ResumeButton",
+    "_name": "NextLevelButton",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -1149,7 +1149,7 @@
     },
     "component": "",
     "_componentId": "9c662kcM0xDhq7upmML/VlM",
-    "handler": "onResumeButtonClicked",
+    "handler": "onNextButtonClicked",
     "customEventData": ""
   },
   {

@@ -5,6 +5,7 @@ import { GamePlay } from './GamePlay';
 import { UIManager } from '../UIManager';
 import { CharacterManager } from '../../Manager/CharacterManager';
 import { LevelManager } from '../../Manager/LevelManager';
+import { MainController } from '../../Manager/MainController';
 const { ccclass, property } = _decorator;
 
 @ccclass('HintUI')
@@ -17,10 +18,7 @@ export class HintUI extends UICanvas {
     }
 
     onRestartButtonClicked() {
-        BlockController.getInstance().reset();
-        CharacterManager.getInstance().reset();
-        LevelManager.getInstance().loadCurrentLevel();
-        UIManager.getInstance().openUI(GamePlay);
+        MainController.getInstance().restart();
         this.close(0);
     }
 }

@@ -22,19 +22,19 @@ export class NodeBlock extends Component {
     isChoose: boolean = false;
     anotherBlock: NodeBlock;
 
-    onInit(color: Color, startPos: Vec3, blockNumber: number) {
+    onInit(color: Color, startPos: Vec3, blockNumber: number, blockController: BlockController) {
         this.canvas = find("Canvas");
         this.turnOnEvent();
 
         this.blockColor = color;
         this.blockStartPos = startPos;
-        this.blockController = BlockController.getInstance();
+        this.blockController = blockController;
         this.blockSize = LevelManager.getInstance().blockWidth;
         this.currentPos = this.node.position.clone();
         this.blockNumber = blockNumber;
 
-        this.movementExtraX = (BlockController.getInstance().currentMap[0].length / 2 - 0.5 - Math.floor(BlockController.getInstance().currentMap[0].length / 2)) * this.blockSize;
-        this.movementExtraY = (BlockController.getInstance().currentMap.length / 2 - 0.5 - Math.floor(BlockController.getInstance().currentMap.length / 2)) * this.blockSize;
+        this.movementExtraX = (this.blockController.currentMap[0].length / 2 - 0.5 - Math.floor(this.blockController.currentMap[0].length / 2)) * this.blockSize;
+        this.movementExtraY = (this.blockController.currentMap.length / 2 - 0.5 - Math.floor(this.blockController.currentMap.length / 2)) * this.blockSize;
     }
 
     onTouchMove(event: EventTouch) {
@@ -171,14 +171,14 @@ export class NodeBlock extends Component {
 
     onMouseUP(event: EventMouse) {
         log("Mouse Up");
-        log(this.currentPath);
+        log("Curent Path:" , this.currentPath);
         this.currentPos = this.node.position.clone();
         if (this.isChoose) {
             this.blockController.changeCurrentMap(this.blockNumber, this.currentPath);
         }
         log("CurrentMap", this.blockController.currentMap);
         this.isChoose = false;
-        log(this.blockController.checkWin());
+        this.blockController.checkWin();
         // if(Vec3.distance(this.node.position, this.anotherBlock.node.position) < 0.1) {
         this.blockController.makeHeroAttackMonster(this.blockNumber);
         // }
@@ -240,6 +240,10 @@ export class NodeBlock extends Component {
             log("Block", block, "DeltaPos", deltaPos);
             if (Vec3.distance(block, deltaPos) < this.blockSize / 2) {
                 log("Reset Path");
+                let listBlock = this.blockController.getCOLOUR_LIST_COLOR().get(list[i].blockColor);
+                if (listBlock == null) {
+                    return;
+                }
                 this.blockController.getCOLOUR_LIST_COLOR().get(list[i].blockColor).resetPath();
                 this.blockController.getCOLOUR_LIST_COLOR().get(list[i].blockColor).isChoose = true;
                 CharacterManager.getInstance().moveMonster(true, list[i].blockNumber);

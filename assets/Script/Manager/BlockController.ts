@@ -68,6 +68,7 @@ export class BlockController extends Singleton<BlockController> {
     PATHPARENT_LIST_COLOR : Map<Color, Node> = new Map(); // Lưu pathParent theo màu
     currentColorNumber: number = 0;
     readMapObj: ReadMap = null;
+    isWin: boolean = false;
     onLoad() {
         super.onLoad();
         this.readMap();
@@ -118,7 +119,7 @@ export class BlockController extends Singleton<BlockController> {
 
         block.getComponent(UITransform).width = LevelManager.getInstance().blockWidth * 0.8;
         block.getComponent(UITransform).height = LevelManager.getInstance().blockWidth * 0.8;
-        block.getComponent(NodeBlock).onInit(color, pos, blockNumber);
+        block.getComponent(NodeBlock).onInit(color, pos, blockNumber, this);
         let blockSprite = block.getComponent(Sprite);
         blockSprite.color = color; 
     }
@@ -271,11 +272,12 @@ export class BlockController extends Singleton<BlockController> {
         for (let i = 1; i < list.length; i++) {
             if (list[i].blockNumber == list[i - 1].blockNumber) {
                 if (Vec3.distance(list[i].node.position, list[i - 1].node.position) > 0.1) {
-                    return false;
+                    this.isWin = false;
+                    return;
                 }
             }
+        this.isWin = true;
         }
-        return true;
     }
 
     makeHeroAttackMonster(blockNumber: number) {
@@ -297,9 +299,10 @@ export class BlockController extends Singleton<BlockController> {
                     log("Monster pos: " + monsterPos);
                     log("Monster origin pos: " + monsterOriginPos);
                     if (Vec3.distance(monsterPos, monsterOriginPos) < 0.1) {
+                        log("Call CharacterManager.getInstance().moveMonster");
                         CharacterManager.getInstance().makeHeroAttackMonster(list[i].blockNumber);
                     } 
-                    break;
+                    return;
                 }
             }
         }
@@ -340,11 +343,12 @@ export class BlockController extends Singleton<BlockController> {
 
     reset() {
         log("Reset");
+        this.isWin = false;
+
         let list = Array.from(NODEBLOCK_LIST_POS.keys());
         for (let i = 0; i < list.length; i++) {
             list[i].node.destroy();
         }
-
         let listBlock = this.blockParent.children;
         for (let i = 0; i < listBlock.length; i++) {
             listBlock[i].destroy();

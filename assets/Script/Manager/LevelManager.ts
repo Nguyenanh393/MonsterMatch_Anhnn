@@ -26,8 +26,11 @@ export class LevelManager extends Singleton<LevelManager> {
     partBg : Node = null;
 
     onLoad() {
+        //delete current level in local storage
+        //localStorage.removeItem("currentLevel");
         super.onLoad();
         this.floor = this.mapParent.children[1].getComponent(Floor);
+        this.currentLevel = localStorage.getItem("currentLevel") ? parseInt(localStorage.getItem("currentLevel")) : 1;
     }
     getLevelData(currentLevel: number) {
         return this.levelDataList[currentLevel - 1];
@@ -57,6 +60,9 @@ export class LevelManager extends Singleton<LevelManager> {
 
     nextLevel() {
         this.currentLevel++;
+        if (this.currentLevel > this.levelDataList.length) {
+            this.currentLevel = 1;
+        }
         this.saveCurrentLevel();
         this.readMapObj.loadLevel(this.currentLevel);
 

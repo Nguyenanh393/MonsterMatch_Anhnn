@@ -1,12 +1,13 @@
-import { _decorator, Component, easing, instantiate, log, Node, Prefab, Sprite, tween, UI, UITransform, Vec3 } from 'cc';
+import { _decorator, Component, easing, game, instantiate, log, Node, Prefab, Sprite, tween, UI, UITransform, Vec3 } from 'cc';
 import { LevelManager } from './LevelManager';
 import { BlockController } from './BlockController';
 import { Singleton } from '../Other/Singleton';
 import { UIManager } from '../UI/UIManager';
 import { WinUI } from '../UI/UICanvas/WinUI';
+import { GamePlay } from '../UI/UICanvas/GamePlay';
 const { ccclass, property } = _decorator;
 
-const MONSTER_START_POSITION_X = 100;
+const MONSTER_START_POSITION_X = 0;
 const MONSTER_DISTANCE = 20
 @ccclass('CharacterManager')
 export class CharacterManager extends Singleton<CharacterManager> {
@@ -35,7 +36,7 @@ export class CharacterManager extends Singleton<CharacterManager> {
         for (let i = 0; i < max_value; i++) {
             let monster = instantiate(this.monsterPrefab);
             monster.setParent(this.monsterParent);
-            this.originPos.push(new Vec3(MONSTER_START_POSITION_X + i * (this.monsterSize + MONSTER_DISTANCE)
+            this.originPos.push(new Vec3(MONSTER_START_POSITION_X + i * (this.monsterSize)
                             , LevelManager.getInstance().getMovementUI() + this.monsterSize/2, 0));
             monster.setPosition(this.originPos[i]);
 
@@ -52,7 +53,7 @@ export class CharacterManager extends Singleton<CharacterManager> {
     spawnHero() {
         this.hero = instantiate(this.heroPrefab);
         this.hero.setParent(this.heroParent);
-        this.hero.setPosition(-200, LevelManager.getInstance().getMovementUI() + this.monsterSize * 1.6 /2 );
+        this.hero.setPosition(-400, LevelManager.getInstance().getMovementUI() + this.monsterSize * 1.6 /2 );
 
         // let heroSprite = hero.getComponent(Sprite);
         // heroSprite.color = BlockController.getInstance().colourList[1];
@@ -60,7 +61,7 @@ export class CharacterManager extends Singleton<CharacterManager> {
         let heroUITransform = this.hero.getComponent(UITransform);
         heroUITransform.width = this.monsterSize * 1.6;
         heroUITransform.height = this.monsterSize * 1.6;
-        this.heroPos = new Vec3(-200, LevelManager.getInstance().getMovementUI() + this.monsterSize * 1.6 /2, 0);
+        this.heroPos = new Vec3(-400, LevelManager.getInstance().getMovementUI() + this.monsterSize * 1.6 /2, 0);
         log("Hero pos: " + this.heroPos);
     }
 
@@ -78,23 +79,37 @@ export class CharacterManager extends Singleton<CharacterManager> {
         if (Vec3.distance(monsterPos, this.originPos[blockColor - 1]) < 0.1) {
             if (!isMoveUp) {
                 log("Move down");
-                let monsterNewPos = new Vec3(this.originPos[blockColor - 1].x, this.originPos[blockColor - 1].y - 100, this.originPos[blockColor - 1].z);
-                monster.position = monsterNewPos;
+                let monsterNewPos = new Vec3(this.originPos[blockColor - 1].x + 1000, this.originPos[blockColor - 1].y + 1000, this.originPos[blockColor - 1].z);
+                // monster.position = monsterNewPos;
+                tween(monster.position).to(0.3, monsterNewPos, {
+                    onUpdate: (target: Vec3, ratio: number) => {
+                        monster.position = target;
+                    },
+                    easing: easing.cubicInOut
+                }).start();
             }
         } else {
             if (isMoveUp) {
                 log("Move up");
                 let monsterNewPos = new Vec3(this.originPos[blockColor - 1].x, this.originPos[blockColor - 1].y, this.originPos[blockColor - 1].z);
-                monster.position = monsterNewPos;
+                // monster.position = monsterNewPos;
+                tween(monster.position).to(0.3, monsterNewPos, {
+                    onUpdate: (target: Vec3, ratio: number) => {
+                        monster.position = target;
+                    },
+                    easing: easing.cubicInOut
+                }).start();
             }
         }
+
+        // moveByTween();
     }
 
     async makeHeroAttackMonster(blockColor: number) {
         let index = blockColor - 1;
         let monsterPos = this.list_monster[index].position.clone();
-    
-        let time = 0.5;
+        monsterPos.x -= this.monsterSize / 2 + this.monsterSize * 1.6 / 2;
+        let time = 0.4;
     
         log("Hero pos: " + this.heroPos);
         log("Monster pos: " + monsterPos);
@@ -109,12 +124,6 @@ export class CharacterManager extends Singleton<CharacterManager> {
                             log("Hero pos: " + target);
                             this.hero.position = target;
                         },
-                        easing: easing.cubicInOut
-                    })
-                    .to(time, new Vec3(-200, LevelManager.getInstance().getMovementUI() + this.monsterSize * 1.6 / 2, 0), {
-                        onUpdate: (target: Vec3, ratio: number) => {
-                            this.hero.position = target;
-                        },
                         easing: easing.cubicInOut,
                         onComplete: () => {
                             resolve();
@@ -122,16 +131,55 @@ export class CharacterManager extends Singleton<CharacterManager> {
                     })
                     .start();
             });
-        };
+        }; 
+        
+        const returnByTween = () => {
+            log("Move by tween");
+            return new Promise<void>((resolve) => {
+                tween(this.hero.position)
+                .to(time, new Vec3(-400, LevelManager.getInstance().getMovementUI() + this.monsterSize * 1.6 / 2, 0), {
+                    onUpdate: (target: Vec3, ratio: number) => {
+                        this.hero.position = target;
+                    },
+                    easing: easing.cubicInOut,
+                    onComplete: () => {
+                        resolve();
+                    }
+                })
+                .start();
+            });
+        }; 
+        
+        const moveMonster = async () => { 
+            log("Move monster");
+            await moveByTween();
+            log("Block color: " + blockColor);
+        
+            this.moveMonster(true, blockColor);
+            returnByTween();
+            log("BlockController.getInstance().isWin: " + BlockController.getInstance().isWin);
+            if (BlockController.getInstance().isWin) {
+                log("Call win ui");
+                UIManager.getInstance().closeUI(GamePlay);
+                UIManager.getInstance().openUI(WinUI);
+                BlockController.getInstance().turnOffNodeBlockEvent();
+                BlockController.getInstance().isWin = false;
+            }
+        }
+        
     
-        await moveByTween();
+        //await moveByTween();
+        await moveMonster();
         log("Block color: " + blockColor);
     
         this.moveMonster(false, blockColor);
 
-        if (BlockController.getInstance().checkWin()) {
+        log("BlockController.getInstance().isWin: " + BlockController.getInstance().isWin);
+        if (BlockController.getInstance().isWin) {
+            log("Call win ui");
             UIManager.getInstance().openUI(WinUI);
             BlockController.getInstance().turnOffNodeBlockEvent();
+            BlockController.getInstance().isWin = false;
         }
     }
 

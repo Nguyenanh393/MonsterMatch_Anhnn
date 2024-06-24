@@ -4,6 +4,7 @@ import { UIManager } from '../UI/UIManager';
 import { GamePlay } from '../UI/UICanvas/GamePlay';
 import { BlockController } from './BlockController';
 import { LevelManager } from './LevelManager';
+import { CharacterManager } from './CharacterManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('MainController')
@@ -17,11 +18,32 @@ export class MainController extends Singleton<MainController> {
     @property(LevelManager)
     levelManager: LevelManager = null;
 
-    async start(): Promise<void> {
+    start() {
         //this.uiManager.openUI(GamePlay);
         this.levelManager.mapParent.active = true;
+        this.setLevelLabel();        
+        log("Current Level: ", this.levelManager.currentLevel);
+    }
 
-        let gamePlay = await this.uiManager.getUI(GamePlay);
+    reset() {
+        BlockController.getInstance().reset();
+        CharacterManager.getInstance().reset();
+        
+    }
+    restart() {
+        this.reset();
+        LevelManager.getInstance().loadCurrentLevel();
+        this.setLevelLabel();
+    }
+
+    nextLevel() {
+        this.reset();
+        LevelManager.getInstance().nextLevel();
+        this.setLevelLabel();
+    }
+
+    async setLevelLabel(): Promise<void> {
+        let gamePlay = await this.uiManager.openUI(GamePlay);
         log('GamePlay:', gamePlay);
         //gamePlay.setPositionPartBg();
         gamePlay.setLevelLabel(this.levelManager.currentLevel);
