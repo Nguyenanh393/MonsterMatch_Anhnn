@@ -12,17 +12,17 @@ export class MainController extends Singleton<MainController> {
     @property(UIManager)
     uiManager: UIManager = null;
 
-    @property(BlockController)
-    blockController: BlockController = null;
+    // @property(BlockController)
+    // blockController: BlockController = null;
 
-    @property(LevelManager)
-    levelManager: LevelManager = null;
+    // @property(LevelManager)
+    // levelManager: LevelManager = null;
 
     start() {
         //this.uiManager.openUI(GamePlay);
-        this.levelManager.mapParent.active = true;
-        this.setLevelLabel();        
-        log("Current Level: ", this.levelManager.currentLevel);
+        LevelManager.getInstance().mapParent.active = true;
+        // this.setLevelLabel();        
+        log("Current Level: ",  LevelManager.getInstance().currentLevel);
     }
 
     reset() {
@@ -33,21 +33,21 @@ export class MainController extends Singleton<MainController> {
     restart() {
         this.reset();
         LevelManager.getInstance().loadCurrentLevel();
-        this.setLevelLabel();
+        // this.setLevelLabel();
     }
 
     nextLevel() {
         this.reset();
         LevelManager.getInstance().nextLevel();
-        this.setLevelLabel();
+        // this.setLevelLabel();
     }
 
-    async setLevelLabel(): Promise<void> {
-        let gamePlay = await this.uiManager.openUI(GamePlay);
-        log('GamePlay:', gamePlay);
-        //gamePlay.setPositionPartBg();
-        gamePlay.setLevelLabel(this.levelManager.currentLevel);
-    }
+    // async setLevelLabel(): Promise<void> {
+    //     let gamePlay = await this.uiManager.openUI(GamePlay);
+    //     log('GamePlay:', gamePlay);
+    //     //gamePlay.setPositionPartBg();
+    //     gamePlay.setLevelLabel(this.levelManager.currentLevel);
+    // }
 }
 
 

@@ -12,6 +12,10 @@ export class GamePlay extends UICanvas {
     @property(Label)
     levelLabel: Label = null;
 
+    onEnable(): void {
+        super.onEnable();
+        this.setLevelLabel(LevelManager.getInstance().currentLevel);
+    }
     setLevelLabel(level: number) {
         this.levelLabel.string = `Level ${level}`;
     }

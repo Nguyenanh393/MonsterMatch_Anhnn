@@ -108,7 +108,8 @@ export class CharacterManager extends Singleton<CharacterManager> {
     async makeHeroAttackMonster(blockColor: number) {
         let index = blockColor - 1;
         let monsterPos = this.list_monster[index].position.clone();
-        monsterPos.x -= this.monsterSize / 2 + this.monsterSize * 1.6 / 2;
+        monsterPos.x -= this.monsterSize / 2;
+        monsterPos.y += this.monsterSize / 2 + this.monsterSize * 1.6 / 2;
         let time = 0.4;
     
         log("Hero pos: " + this.heroPos);
@@ -117,12 +118,38 @@ export class CharacterManager extends Singleton<CharacterManager> {
     
         const moveByTween = () => {
             log("Move by tween");
+        
+            const bezier = (t: number, startPos: Vec3, controlPos: Vec3, endPos: Vec3) => {
+                const u = 1 - t;
+                const tt = t * t;
+                const uu = u * u;
+        
+                const p = new Vec3();
+                p.x = uu * startPos.x + 2 * u * t * controlPos.x + tt * endPos.x;
+                p.y = uu * startPos.y + 2 * u * t * controlPos.y + tt * endPos.y;
+                p.z = uu * startPos.z + 2 * u * t * controlPos.z + tt * endPos.z;
+        
+                return p;
+            };
+        
             return new Promise<void>((resolve) => {
+                const startPos = this.hero.position.clone();
+                const endPos = monsterPos;
+        
+                // Điểm kiểm soát cho đường cong (có thể điều chỉnh độ cao của đường cong)
+                const controlPos = new Vec3((startPos.x + endPos.x) / 2, startPos.y + 200, 0);
+        
+                const time = 0.3; // Thời gian di chuyển
+                let elapsedTime = 0;
+        
                 tween(this.hero.position)
-                    .to(time, monsterPos, {
+                    .to(time, {}, {
                         onUpdate: (target: Vec3, ratio: number) => {
-                            log("Hero pos: " + target);
-                            this.hero.position = target;
+                            elapsedTime += game.deltaTime;
+                            const t = elapsedTime / time;
+                            const bezierPos = bezier(t, startPos, controlPos, endPos);
+                            this.hero.position = bezierPos;
+                            log("Hero pos: " + bezierPos);
                         },
                         easing: easing.cubicInOut,
                         onComplete: () => {
@@ -131,7 +158,8 @@ export class CharacterManager extends Singleton<CharacterManager> {
                     })
                     .start();
             });
-        }; 
+        };
+         
         
         const returnByTween = () => {
             log("Move by tween");

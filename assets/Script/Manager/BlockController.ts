@@ -337,6 +337,9 @@ export class BlockController extends Singleton<BlockController> {
             listPath = listPath.concat(listPathParent[i].children);
         }
         for (let i = 0; i < listPath.length; i++) {
+            if (listPath[i] == null) {
+                continue;
+            }
             listPath[i].getComponent(PathBlock).turnOnNodeBlockEvent();
         }
     }
